@@ -17,28 +17,31 @@ fun main() {
 
 data class Food(val type: FoodType)
 enum class FoodType(val foodPrice: Long) {
-    Shishleag(20000L),
+    Shishleag(15000L),
     Ghormeh(10000L),
     Adas(5000L)
 }
 
-class Sandogh(val nameOfWorker: String):Ashpaz.AshpazPokhtListener {
+class Sandogh(val nameOfWorker: String){
     private val ashpaz = Ashpaz()
     fun acceptOrder(food: Food) {
-        ashpaz.pokht(food,this)
-    }
-
-    override fun pokhted(food: Food) {
-        println(food.type.name)
+        ashpaz.pokht(food,object : Ashpaz.AshpazPokhtListener {
+            override fun pokhted(food: Food) {
+                    println(food.type.name)
+            }
+        })
     }
 }
 
 class Ashpaz() {
     fun pokht(food: Food,callback:AshpazPokhtListener) {
-        blockingDelay(food.type.foodPrice)
-        val pokhteFood= Food(food.type)
-       callback.pokhted(pokhteFood)
+        nonBlockingDelay(food.type.foodPrice){
+            val pokhteFood= Food(food.type)
+            callback.pokhted(pokhteFood)
+        }
+
     }
+
     interface AshpazPokhtListener {
         fun pokhted(food: Food)
     }

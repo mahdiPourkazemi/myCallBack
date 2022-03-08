@@ -6,12 +6,12 @@ import java.util.concurrent.Executors
 fun main() {
     val mSandogh = Sandogh("mahdi")
     val mFood = Food(FoodType.Shishleag)
-    val tFood=Food(FoodType.Ghormeh)
-    val aFood=Food(FoodType.Adas)
-    println( mSandogh.acceptOrder(tFood).toString()+" is ready")
+    val tFood = Food(FoodType.Ghormeh)
+    val aFood = Food(FoodType.Adas)
+    mSandogh.acceptOrder(tFood)
 
-    println( mSandogh.acceptOrder(aFood).toString()+" is ready")
-    println( mSandogh.acceptOrder(mFood).toString()+" is ready")
+    mSandogh.acceptOrder(aFood)
+    mSandogh.acceptOrder(mFood)
 
 }
 
@@ -22,24 +22,34 @@ enum class FoodType(val foodPrice: Long) {
     Adas(5000L)
 }
 
-class Sandogh(val nameOfWorker: String) {
+class Sandogh(val nameOfWorker: String):Ashpaz.AshpazPokhtListener {
     private val ashpaz = Ashpaz()
-    fun acceptOrder(food: Food): FoodType {
-        return ashpaz.pokht(food)
+    fun acceptOrder(food: Food) {
+        ashpaz.pokht(food,this)
+    }
 
+    override fun pokhted(food: Food) {
+        println(food.type.name)
     }
 }
 
 class Ashpaz() {
-    fun pokht(food: Food): FoodType {
+    fun pokht(food: Food,callback:AshpazPokhtListener) {
         blockingDelay(food.type.foodPrice)
-        return food.type
+        val pokhteFood= Food(food.type)
+       callback.pokhted(pokhteFood)
+    }
+    interface AshpazPokhtListener {
+        fun pokhted(food: Food)
     }
 }
+
+
 
 fun blockingDelay(time: Long) {
     Thread.sleep(time)
 }
+
 fun nonBlockingDelay(time: Long, complete: () -> Unit) {
     val completableFuture = CompletableFuture<String>()
     Executors.newCachedThreadPool().submit<Any?> {
